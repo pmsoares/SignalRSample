@@ -17,72 +17,75 @@ let trigger_slytherin = document.getElementById("trigger_slytherin");
 let trigger_hufflepuff = document.getElementById("trigger_hufflepuff");
 let trigger_ravenclaw = document.getElementById("trigger_ravenclaw");
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/houseGroupHub").build();
+const connectionHouseGroup = new signalR.HubConnectionBuilder()
+    .withUrl("/houseGroupHub")
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
 
 btn_gryffindor.addEventListener("click", function (event) {
-    connection.send("JoinHouse", "Gryffindor");
+    connectionHouseGroup.send("JoinHouse", "Gryffindor");
     event.preventDefault();
 });
 btn_slytherin.addEventListener("click", function (event) {
-    connection.send("JoinHouse", "Slytherin");
+    connectionHouseGroup.send("JoinHouse", "Slytherin");
     event.preventDefault();
 });
 btn_hufflepuff.addEventListener("click", function (event) {
-    connection.send("JoinHouse", "Hufflepuff");
+    connectionHouseGroup.send("JoinHouse", "Hufflepuff");
     event.preventDefault();
 });
 btn_ravenclaw.addEventListener("click", function (event) {
-    connection.send("JoinHouse", "Ravenclaw");
+    connectionHouseGroup.send("JoinHouse", "Ravenclaw");
     event.preventDefault();
 });
 
 btn_un_gryffindor.addEventListener("click", function (event) {
-    connection.send("LeaveHouse", "Gryffindor");
+    connectionHouseGroup.send("LeaveHouse", "Gryffindor");
     event.preventDefault();
 });
 btn_un_slytherin.addEventListener("click", function (event) {
-    connection.send("LeaveHouse", "Slytherin");
+    connectionHouseGroup.send("LeaveHouse", "Slytherin");
     event.preventDefault();
 });
 btn_un_hufflepuff.addEventListener("click", function (event) {
-    connection.send("LeaveHouse", "Hufflepuff");
+    connectionHouseGroup.send("LeaveHouse", "Hufflepuff");
     event.preventDefault();
 });
 btn_un_ravenclaw.addEventListener("click", function (event) {
-    connection.send("LeaveHouse", "Ravenclaw");
+    connectionHouseGroup.send("LeaveHouse", "Ravenclaw");
     event.preventDefault();
 });
 
 trigger_gryffindor.addEventListener("click", function (event) {
-    connection.send("TriggerHouseNotify", "Gryffindor");
+    connectionHouseGroup.send("TriggerHouseNotify", "Gryffindor");
     event.preventDefault();
 });
 trigger_slytherin.addEventListener("click", function (event) {
-    connection.send("TriggerHouseNotify", "Slytherin");
+    connectionHouseGroup.send("TriggerHouseNotify", "Slytherin");
     event.preventDefault();
 });
 trigger_hufflepuff.addEventListener("click", function (event) {
-    connection.send("TriggerHouseNotify", "Hufflepuff");
+    connectionHouseGroup.send("TriggerHouseNotify", "Hufflepuff");
     event.preventDefault();
 });
 trigger_ravenclaw.addEventListener("click", function (event) {
-    connection.send("TriggerHouseNotify", "Ravenclaw");
+    connectionHouseGroup.send("TriggerHouseNotify", "Ravenclaw");
     event.preventDefault();
 });
 
-connection.on("triggerHouseNotification", (houseName) => {
+connectionHouseGroup.on("triggerHouseNotification", (houseName) => {
     toastr.success(`A new notification for ${houseName} has been launched.`);
 });
 
-connection.on("newMemberAddedToHouse", (houseName) => {
+connectionHouseGroup.on("newMemberAddedToHouse", (houseName) => {
     toastr.success(`Member has subscribed to ${houseName}`);
 });
 
-connection.on("newMemberRemovedFromHouse", (houseName) => {
+connectionHouseGroup.on("newMemberRemovedFromHouse", (houseName) => {
     toastr.warning(`Member has unsubscribed to ${houseName}`);
 });
 
-connection.on("subscriptionStatus", (strGroupsJoined, houseName, hasSubscribed) => {
+connectionHouseGroup.on("subscriptionStatus", (strGroupsJoined, houseName, hasSubscribed) => {
     lbl_houseJoined.innerText = strGroupsJoined;
 
     if (hasSubscribed) {
@@ -143,10 +146,20 @@ connection.on("subscriptionStatus", (strGroupsJoined, houseName, hasSubscribed) 
     }
 })
 
-connection.start().then(fulfilled, rejected);
+async function start() {
+    try {
+        await connectionHouseGroup.start();
+        console.log("SignalR Connected: houseGroup");
 
-function fulfilled() {
-}
+    } catch (err) {
+        console.log(err);
+        setTimeout(start, 5000);
+    }
+};
 
-function rejected() {
-}
+connectionHouseGroup.onclose(async () => {
+    await start();
+});
+
+// Start the connection.
+start();

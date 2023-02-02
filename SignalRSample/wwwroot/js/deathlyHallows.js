@@ -4,7 +4,10 @@ var cloakSpan = document.getElementById("cloakCounter");
 var stoneSpan = document.getElementById("stoneCounter");
 var wandSpan = document.getElementById("wandCounter");
 
-var connectionDeathlyHallows = new signalR.HubConnectionBuilder().withUrl("/deathlyhallowsHub").build();
+const connectionDeathlyHallows = new signalR.HubConnectionBuilder()
+    .withUrl("/deathlyhallowsHub")
+    .configureLogging(signalR.LogLevel.Information)
+    .build()
 
 connectionDeathlyHallows.on("updateDeathlyHallowCount", (cloak, stone, wand) => {
     cloakSpan.innerText = cloak.toString();
@@ -12,15 +15,25 @@ connectionDeathlyHallows.on("updateDeathlyHallowCount", (cloak, stone, wand) => 
     wandSpan.innerText = wand.toString();
 });
 
-connectionDeathlyHallows.start().then(fulfilled, rejected);
+async function start() {
+    try {
+        await connectionDeathlyHallows.start();
+        console.log("SignalR Connected: DeathlyHallows");
 
-function fulfilled() {
-    connectionDeathlyHallows.invoke("GetRaceStatus").then((raceCounter) => {
-        cloakSpan.innerText = raceCounter.cloak.toString();
-        stoneSpan.innerText = raceCounter.stone.toString();
-        wandSpan.innerText = raceCounter.wand.toString();
-    });
-}
+        await connectionDeathlyHallows.invoke("GetRaceStatus").then((raceCounter) => {
+            cloakSpan.innerText = raceCounter.cloak.toString();
+            stoneSpan.innerText = raceCounter.stone.toString();
+            wandSpan.innerText = raceCounter.wand.toString();
+        });
+    } catch (err) {
+        console.log(err);
+        setTimeout(start, 5000);
+    }
+};
 
-function rejected() {
-}
+connectionDeathlyHallows.onclose(async () => {
+    await start();
+});
+
+// Start the connection.
+start();

@@ -13,7 +13,7 @@ namespace SignalRSample.Hubs
             TotalViews++;
             //enviar atualizações para todos os clientes
             await Clients.All.SendAsync("updateTotalViews", TotalViews);
-            return $"total views from {name} - {TotalViews}";
+            return $"Total views from {name} - {TotalViews}";
         }
 
         public override Task OnConnectedAsync()
