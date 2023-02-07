@@ -1,5 +1,7 @@
-﻿var connectionChat = new signalR.HubConnectionBuilder()
-    .withUrl("chatHub")
+﻿"use strict";
+
+var connectionChat = new signalR.HubConnectionBuilder()
+    .withUrl("/chatHub")
     .build();
 
 document.getElementById("sendMessage").disabled = true;
@@ -19,13 +21,13 @@ document.getElementById("sendMessage").addEventListener("click", function (event
         connectionChat.send("SendMessageToReceiver", sender, receiver, message);
     }
     else {
-    // enviar mensagem para todos os utilizadores
-    connectionChat.send("SendMessageToAll", sender, message).catch(function (err) {
-        return console.error(err.toString());
-    });
-}
+        // enviar mensagem para todos os utilizadores
+        connectionChat.send("SendMessageToAll", sender, message).catch(function (err) {
+            return console.error(err.toString());
+        });
+    }
 
-event.preventDefault();
+    event.preventDefault();
 });
 
 connectionChat.start().then(function () {
