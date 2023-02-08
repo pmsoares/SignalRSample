@@ -2,34 +2,22 @@
 
 var connectionChat = new signalR.HubConnectionBuilder()
     .withUrl("/chatHub")
+    .withAutomaticReconnect([0, 1000, 5000, null])
     .build();
 
-document.getElementById("sendMessage").disabled = true;
-
-connectionChat.on("MessageReceived", function (user, message) {
-    var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
-    li.textContent = `${user} - ${message}`;
+connectionChat.on("ReceiveUserConnected", function (userId, userName, isOldConnection) {
+    if (!isOldConnection)
+        addMessage(`${userName} is online`);
 });
 
-document.getElementById("sendMessage").addEventListener("click", function (event) {
-    var sender = document.getElementById("senderEmail").value;
-    var receiver = document.getElementById("receiverEmail").value;
-    var message = document.getElementById("chatMessage").value;
+function addMessage(msg) {
+    if (msg == null && msg == '')
+        return;
 
-    if (receiver.length > 0) {
-        connectionChat.send("SendMessageToReceiver", sender, receiver, message);
-    }
-    else {
-        // enviar mensagem para todos os utilizadores
-        connectionChat.send("SendMessageToAll", sender, message).catch(function (err) {
-            return console.error(err.toString());
-        });
-    }
+    let ui = document.getElementById('messagesList');
+    let li = document.createElement("li");
+    li.innerHTML = msg;
+    ui.appendChild(li);
+}
 
-    event.preventDefault();
-});
-
-connectionChat.start().then(function () {
-    document.getElementById("sendMessage").disabled = false;
-});
+connectionChat.start();

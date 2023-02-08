@@ -49,6 +49,7 @@ app.MapHub<UserHub>("/userHub");
 app.MapHub<DeathlyHallowsHub>("/deathlyhallowsHub");
 app.MapHub<HouseGroupHub>("/houseGroupHub");
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<BasicChatHub>("/basicChatHub");
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<OrderHub>("/orderHub");
 
